@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 350px;
+      padding: 20px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      margin: 0;
+    }
+    
+    h1 {
+      font-size: 20px;
+      margin: 0 0 15px 0;
+      text-align: center;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    
+    .container {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    button {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 8px 0;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    
+    button:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    .primary-btn {
+      background: rgba(76, 175, 80, 0.8);
+      border-color: rgba(76, 175, 80, 0.9);
+    }
+    
+    .primary-btn:hover {
+      background: rgba(76, 175, 80, 0.9);
+    }
+    
+    .secondary-btn {
+      background: rgba(33, 150, 243, 0.8);
+      border-color: rgba(33, 150, 243, 0.9);
+    }
+    
+    .secondary-btn:hover {
+      background: rgba(33, 150, 243, 0.9);
+    }
+    
+    .test-btn {
+      background: rgba(255, 193, 7, 0.8);
+      border-color: rgba(255, 193, 7, 0.9);
+    }
+    
+    .test-btn:hover {
+      background: rgba(255, 193, 7, 0.9);
+    }
+    
+    #status {
+      margin: 15px 0 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      min-height: 20px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .success {
+      background: rgba(76, 175, 80, 0.8);
+      border: 1px solid rgba(76, 175, 80, 0.9);
+    }
+    
+    .error {
+      background: rgba(244, 67, 54, 0.8);
+      border: 1px solid rgba(244, 67, 54, 0.9);
+    }
+    
+    .info {
+      background: rgba(33, 150, 243, 0.8);
+      border: 1px solid rgba(33, 150, 243, 0.9);
+    }
+    
+    .auto-status {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 12px;
+    }
+    
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.2);
+      margin: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔑 Key Auto Collector</h1>
+    
+    <div class="auto-status">
+      <div>🤖 Tự động: Chạy mỗi 20 phút</div>
+      <div>📱 Token sẽ gửi qua Telegram bot</div>
+      <div>🔗 Bot: @tokencussor_bot</div>
+    </div>
+    
+    <button id="testTelegramBtn" class="test-btn">📱 Test Telegram</button>
+    <button id="autoCollectBtn" class="primary-btn">🚀 Tự Động Lấy Token Ngay</button>
+    
+    <div class="divider"></div>
+    
+    <button id="clickGetTokenBtn" class="secondary-btn">👆 Click Nút "Lấy Token"</button>
+    <button id="extractTokenBtn" class="secondary-btn">🔍 Tìm Token Trên Trang</button>
+    <button id="manualSendBtn" class="secondary-btn">📤 Gửi Token Thủ Công</button>
+    
+    <div id="status"></div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const testTelegramBtn = document.getElementById('testTelegramBtn');
+      const autoCollectBtn = document.getElementById('autoCollectBtn');
+      const clickGetTokenBtn = document.getElementById('clickGetTokenBtn');
+      const extractTokenBtn = document.getElementById('extractTokenBtn');
+      const manualSendBtn = document.getElementById('manualSendBtn');
+      const statusDiv = document.getElementById('status');
+      
+      // Test Telegram
+      testTelegramBtn.addEventListener('click', function() {
+        showStatus("📱 Đang test gửi Telegram...", "info");
+        chrome.runtime.sendMessage({action: "testTelegram"}, function(response) {
+          if (response && response.status === "success") {
+            showStatus("✅ Test Telegram thành công! Kiểm tra bot @tokencussor_bot", "success");
+          } else {
+            showStatus("❌ Lỗi test Telegram: " + (response ? response.error : "Không xác định"), "error");
+          }
+        });
+      });
+      
+      // Tự động lấy token ngay
+      autoCollectBtn.addEventListener('click', function() {
+        showStatus("🔄 Đang tự động lấy token...", "info");
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          if (chrome.runtime.lastError) {
+            showStatus("❌ Không thể kết nối với trang!", "error");
+            return;
+          }
+          
+          chrome.tabs.sendMessage(tabs[0].id, {action: "fullAutoProcess", key: "kabistarvnzxczxc"}, function(response) {
+            if (chrome.runtime.lastError) {
+              showStatus("❌ Không thể kết nối với trang!", "error");
+              return;
+            }
+            
+            if (response && response.success) {
+              showStatus("🎉 " + response.message, "success");
+            } else {
+              showStatus("❌ " + (response ? response.message : "Lỗi không xác định"), "error");
+            }
+          });
+        });
+      });
+      
+      // Gửi token thủ công
+      manualSendBtn.addEventListener('click', function() {
+        const token = prompt("Nhập token cần gửi qua Telegram:");
+        if (token && token.trim()) {
+          showStatus("📤 Đang gửi token qua Telegram...", "info");
+          chrome.runtime.sendMessage({action: "sendToken", token: token.trim()}, function(response) {
+            if (response && response.status === "success") {
+              showStatus("✅ Đã gửi token qua Telegram!", "success");
+            } else {
+              showStatus("❌ Lỗi gửi token: " + (response ? response.error : "Không xác định"), "error");
+            }
+          });
+        }
+      });
+      
+      // Click nút "Lấy Token"
+      clickGetTokenBtn.addEventListener('click', function() {
+        showStatus("👆 Đang click nút...", "info");
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {action: "clickGetToken"}, function(response) {
+            if (chrome.runtime.lastError) {
+              showStatus("❌ Không thể kết nối với trang!", "error");
+              return;
+            }
+            
+            if (response && response.success) {
+              showStatus("✅ Đã click thành công!", "success");
+              
+              // Tự động lấy token sau khi click
+              setTimeout(() => {
+                chrome.tabs.sendMessage(tabs[0].id, {action: "getTokenAfterClick"}, function(tokenResponse) {
+                  if (tokenResponse && tokenResponse.token) {
+                    chrome.runtime.sendMessage({action: "saveToken", token: tokenResponse.token}, function(saveResponse) {
+                      if (saveResponse && saveResponse.status === "success") {
+                        showStatus("🎉 Đã lấy và lưu token thành công!", "success");
+                      } else {
+                        showStatus("❌ Lỗi lưu token!", "error");
+                      }
+                    });
+                  } else {
+                    showStatus("⚠️ Click thành công nhưng không tìm thấy token!", "error");
+                  }
+                });
+              }, 3000);
+            } else {
+              showStatus("❌ Không thể click nút!", "error");
+            }
+          });
+        });
+      });
+      
+      // Tìm token trên trang
+      extractTokenBtn.addEventListener('click', function() {
+        showStatus("🔍 Đang tìm token...", "info");
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {action: "extractToken"}, function(response) {
+            if (chrome.runtime.lastError) {
+              showStatus("❌ Không thể kết nối với trang!", "error");
+              return;
+            }
+            
+            if (response && response.token) {
+              chrome.runtime.sendMessage({action: "sendToken", token: response.token}, function(sendResponse) {
+                if (sendResponse && sendResponse.status === "success") {
+                  showStatus("🎉 Tìm thấy và gửi token qua Telegram!", "success");
+                } else {
+                  showStatus("❌ Lỗi gửi token!", "error");
+                }
+              });
+            } else {
+              showStatus("⚠️ Không tìm thấy token trên trang!", "error");
+            }
+          });
+        });
+      });
+      
+      // Hàm hiển thị trạng thái
+      function showStatus(message, type) {
+        statusDiv.textContent = message;
+        statusDiv.className = type;
+        
+        // Tự động ẩn sau 5 giây
+        setTimeout(() => {
+          statusDiv.textContent = '';
+          statusDiv.className = '';
+        }, 5000);
+      }
+      
+      // Hiển thị trạng thái ban đầu
+      showStatus("✨ Extension đã sẵn sàng!", "info");
+    });
+  </script>
+</body>
+</html>

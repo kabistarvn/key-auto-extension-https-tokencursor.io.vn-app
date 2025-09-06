@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Extension - Telegram Only (No File Download)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .status {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .info { border-left: 4px solid #2196F3; }
+        .warning { border-left: 4px solid #ff9800; }
+        .feature-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .feature-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .feature-list li:before {
+            content: "✅ ";
+            margin-right: 10px;
+        }
+        .telegram-info {
+            background: linear-gradient(45deg, #0088cc, #00a8ff);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .telegram-info h3 {
+            margin-top: 0;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Test Extension - Telegram Only Mode</h1>
+        
+        <div class="telegram-info">
+            <h3>📱 Telegram Integration</h3>
+            <p><strong>Bot Token:</strong> 8349265007:AAEGSWe7kfe7Vw2th02Hs4o4HePMdgtzaJM</p>
+            <p><strong>Chat ID:</strong> 709847427</p>
+            <p><strong>Mode:</strong> TELEGRAM ONLY - NO FILE DOWNLOAD</p>
+        </div>
+
+        <div class="feature-list">
+            <h2>🎯 New Features (Telegram Only Mode)</h2>
+            <ul>
+                <li>Token được gửi qua Telegram thay vì tải file</li>
+                <li>Không còn tải file .txt về máy nữa</li>
+                <li>Token được lưu vào Chrome storage làm backup</li>
+                <li>Thông báo cooldown cũng được gửi qua Telegram</li>
+                <li>Extension tự động thử lại sau khi hết cooldown</li>
+                <li>Giao diện thông báo được cải thiện</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Test Functions</h2>
+            <button onclick="testTelegram()">📱 Test Telegram Send</button>
+            <button onclick="startAutoCollection()">🚀 Start Auto Collection</button>
+            <button onclick="testFullProcess()">🔄 Test Full Process</button>
+            <button onclick="clearStatus()">🗑️ Clear Status</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Status Log</h2>
+            <div id="status" class="status info">Ready to test... Click a button above to start testing.</div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Instructions</h2>
+            <ol>
+                <li><strong>Test Telegram:</strong> Gửi token test qua Telegram để kiểm tra kết nối</li>
+                <li><strong>Start Auto Collection:</strong> Bắt đầu quá trình tự động lấy token</li>
+                <li><strong>Test Full Process:</strong> Test toàn bộ quy trình từ đăng nhập đến gửi Telegram</li>
+                <li><strong>Expected Behavior:</strong> Token sẽ được gửi qua Telegram, KHÔNG tải file về máy</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const status = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            status.textContent += logEntry;
+            status.className = `status ${type}`;
+            status.scrollTop = status.scrollHeight;
+        }
+
+        function clearStatus() {
+            document.getElementById('status').textContent = 'Status cleared...\n';
+            document.getElementById('status').className = 'status info';
+        }
+
+        async function testTelegram() {
+            log('🧪 Testing Telegram connection...', 'info');
+            
+            try {
+                const response = await chrome.runtime.sendMessage({
+                    action: "testTelegram"
+                });
+                
+                if (response && response.status === "success") {
+                    log('✅ Telegram test successful! Check your Telegram chat.', 'success');
+                } else {
+                    log(`❌ Telegram test failed: ${response?.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Telegram test error: ${error.message}`, 'error');
+            }
+        }
+
+        async function startAutoCollection() {
+            log('🚀 Starting auto collection...', 'info');
+            
+            try {
+                const response = await chrome.runtime.sendMessage({
+                    action: "startAutoCollection"
+                });
+                
+                if (response && response.status === "success") {
+                    log('✅ Auto collection started successfully!', 'success');
+                    log('📱 Token will be sent to Telegram (NO FILE DOWNLOAD)', 'info');
+                } else {
+                    log(`❌ Auto collection failed: ${response?.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Auto collection error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFullProcess() {
+            log('🔄 Testing full process...', 'info');
+            
+            try {
+                // First, ensure we're on the right page
+                if (!window.location.href.includes('tokencursor.io.vn')) {
+                    log('⚠️ Please navigate to tokencursor.io.vn first', 'warning');
+                    return;
+                }
+                
+                const response = await chrome.runtime.sendMessage({
+                    action: "startAutoCollection"
+                });
+                
+                if (response && response.status === "success") {
+                    log('✅ Full process test started!', 'success');
+                    log('📱 Expected: Token sent to Telegram, NO file download', 'info');
+                } else {
+                    log(`❌ Full process test failed: ${response?.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Full process test error: ${error.message}`, 'error');
+            }
+        }
+
+        // Listen for messages from background script
+        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            if (request.action === "tokenUpdate") {
+                log(`📱 Token update: ${request.message}`, 'success');
+            } else if (request.action === "cooldownUpdate") {
+                log(`⏰ Cooldown update: ${request.message}`, 'warning');
+            }
+        });
+
+        // Initial log
+        log('🎯 Extension loaded in Telegram Only Mode', 'success');
+        log('📱 Token will be sent to Telegram, NO file download', 'info');
+        log('🔧 Ready for testing...', 'info');
+    </script>
+</body>
+</html>

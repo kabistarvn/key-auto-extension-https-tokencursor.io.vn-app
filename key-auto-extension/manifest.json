@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Key Auto Collector",
+  "version": "1.0.1",
+  "description": "Tự động lấy key mỗi 20 phút và lưu vào file",
+  "permissions": [
+    "storage",
+    "alarms",
+    "activeTab",
+    "downloads",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Key Auto Collector"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
